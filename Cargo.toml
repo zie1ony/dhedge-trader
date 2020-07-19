@@ -1,0 +1,11 @@
+[package]
+name = "dht"
+version = "0.1.0"
+authors = ["zie1ony <maciej@casperlabs.io>"]
+edition = "2018"
+
+[dependencies]
+web3 = "0.13.0"
+tokio = { version = "0.2.21", features = ["full"] }
+env_logger = "0.7.1"
+log = "0.4.11"
