@@ -1,12 +1,12 @@
-use std::collections::HashMap;
 use log::*;
+use std::collections::HashMap;
 
 pub type Symbol = String;
 
 #[derive(Debug, Clone)]
 pub struct Asset {
     pub balance: f64,
-    pub rate: f64
+    pub rate: f64,
 }
 
 impl Asset {
@@ -19,7 +19,7 @@ impl Asset {
 pub struct Swap {
     pub from: Symbol,
     pub from_amount: f64,
-    pub to: Symbol
+    pub to: Symbol,
 }
 
 #[derive(Debug)]
@@ -29,15 +29,14 @@ pub struct Pool {
 }
 
 impl Pool {
-    pub fn new(
-        expected_shares: HashMap<Symbol, f64>, 
-        assets: HashMap<Symbol, Asset>
-    ) -> Pool {
-        Pool { expected_shares, assets }
+    pub fn new(expected_shares: HashMap<Symbol, f64>, assets: HashMap<Symbol, Asset>) -> Pool {
+        Pool {
+            expected_shares,
+            assets,
+        }
     }
 
     pub fn print_status(&self) {
-        info!("---------------------------------------------------------------------");
         info!("Pool Status");
 
         let total_value = self.total_value();
@@ -46,14 +45,22 @@ impl Pool {
 
         info!("Pool Assets");
         info!(
-            "{:<15} {:<15} {:<16} {:<16} {:<15} {:<15} {:<16} {:<15} {:<16}", 
-            "Asset", "Amount", "Rate", "Value", "Share", "Exp Share", 
-            "Exp Value", "Exp Bal Change", "Exp Val Change");
+            "{:<15} {:<15} {:<16} {:<16} {:<15} {:<15} {:<16} {:<15} {:<16}",
+            "Asset",
+            "Amount",
+            "Rate",
+            "Value",
+            "Share",
+            "Exp Share",
+            "Exp Value",
+            "Exp Bal Change",
+            "Exp Val Change"
+        );
         for symbol in &self.symbols() {
             info!(
                 "{:<15} {:<15.5} ${:<15.5} ${:<15.5} {:<15.5} {:<15.5} ${:<15.5} {:<15.5} ${:<15.5}", 
-                symbol, 
-                self.balance(symbol), 
+                symbol,
+                self.balance(symbol),
                 self.rate(symbol),
                 self.value(symbol),
                 self.share(symbol),
@@ -68,8 +75,10 @@ impl Pool {
         info!("Rebalance Plan");
         info!("Actions required: {}", swaps.len());
         if swaps.len() > 0 {
-            info!("{:<15} {:<15} {:<15} {:<16}",
-                  "From", "To", "From Amount", "Value");
+            info!(
+                "{:<15} {:<15} {:<15} {:<16}",
+                "From", "To", "From Amount", "Value"
+            );
             for swap in swaps {
                 info!(
                     "{:<15} {:<15} {:<15.5} ${:<15.5}",
@@ -83,7 +92,11 @@ impl Pool {
     }
 
     fn symbols(&self) -> Vec<Symbol> {
-        self.expected_shares.keys().map(|k| k.clone()).collect::<Vec<Symbol>>().clone()
+        self.expected_shares
+            .keys()
+            .map(|k| k.clone())
+            .collect::<Vec<Symbol>>()
+            .clone()
     }
 
     fn asset(&self, symbol: &Symbol) -> &Asset {
@@ -143,12 +156,11 @@ impl Pool {
         while symbols.len() > 1 {
             let len = symbols.len();
             let best = &symbols[0];
-            let worst = &symbols[len-1];
+            let worst = &symbols[len - 1];
             let worst_value_change = self.expected_value_change(&worst);
             let best_value_change = self.expected_value_change(&best);
 
-            if worst_value_change <= 0.0 ||
-               best_value_change >= 0.0 {
+            if worst_value_change <= 0.0 || best_value_change >= 0.0 {
                 break;
             }
 
@@ -165,10 +177,10 @@ impl Pool {
             swaps.push(Swap {
                 from: best.to_string(),
                 to: worst.to_string(),
-                from_amount: value_change / self.rate(best)
+                from_amount: value_change / self.rate(best),
             });
 
-            symbols = symbols[1..(len-1)].to_vec();
+            symbols = symbols[1..(len - 1)].to_vec();
         }
         swaps
     }
@@ -178,7 +190,6 @@ impl Pool {
     }
 
     pub fn rebalance(&mut self) {
-        info!("---------------------------------------------------------------------");
         if self.balanced() {
             info!("Pool is already balanced.");
             return;
@@ -189,14 +200,20 @@ impl Pool {
             let current_from_balance = self.asset(&swap.from.to_string()).balance;
             let current_to_balance = self.asset(&swap.to.to_string()).balance;
             let to_amount = swap.from_amount * self.rate(&swap.from) / self.rate(&swap.to);
-            self.assets.insert(swap.from.clone(), Asset{
-                rate: self.rate(&swap.from),
-                balance: current_from_balance - swap.from_amount
-            });
-            self.assets.insert(swap.to.clone(), Asset{
-                rate: self.rate(&swap.to),
-                balance: current_to_balance + to_amount
-            });
+            self.assets.insert(
+                swap.from.clone(),
+                Asset {
+                    rate: self.rate(&swap.from),
+                    balance: current_from_balance - swap.from_amount,
+                },
+            );
+            self.assets.insert(
+                swap.to.clone(),
+                Asset {
+                    rate: self.rate(&swap.to),
+                    balance: current_to_balance + to_amount,
+                },
+            );
             info!("[x] Swaped {} to {}", swap.from, swap.to);
         }
         info!("Rebalancing done!");
@@ -232,5 +249,4 @@ mod tests {
         }
         assert!(pool.balanced());
     }
-
 }

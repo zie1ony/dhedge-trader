@@ -53,7 +53,7 @@ pub fn u256(val: f64) -> U256 {
         (vals[0], vals[1])
     };
     let a = U256::from_dec_str(a).unwrap() * U256::exp10(18);
-    let b = U256::from_dec_str(b).unwrap() * U256::exp10(18-b.len());
+    let b = U256::from_dec_str(b).unwrap() * U256::exp10(18 - b.len());
     a + b
 }
 
@@ -65,20 +65,35 @@ mod tests {
     fn test_u256() {
         assert_eq!(u256(1.0), U256::exp10(18));
         assert_eq!(u256(0.1), U256::exp10(17));
-        assert_eq!(u256(1.234), U256::from_dec_str("1234").unwrap() * U256::exp10(15));
+        assert_eq!(
+            u256(1.234),
+            U256::from_dec_str("1234").unwrap() * U256::exp10(15)
+        );
         assert!(u256(1.0) < u256(2.123));
     }
 
     #[test]
     fn test_u256_to_f64() {
-        assert_eq!(u256_to_f64(&U256::from_dec_str("1000000000000000000").unwrap()), 1.0);
-        assert_eq!(u256_to_f64(&U256::from_dec_str("100000000000000000").unwrap()), 0.1);
-        assert_eq!(u256_to_f64(&U256::from_dec_str("10000000000000000").unwrap()), 0.01);
+        assert_eq!(
+            u256_to_f64(&U256::from_dec_str("1000000000000000000").unwrap()),
+            1.0
+        );
+        assert_eq!(
+            u256_to_f64(&U256::from_dec_str("100000000000000000").unwrap()),
+            0.1
+        );
+        assert_eq!(
+            u256_to_f64(&U256::from_dec_str("10000000000000000").unwrap()),
+            0.01
+        );
     }
 
     #[test]
     fn test_asset_name() {
-        let sUSD_raw: [u8; 32] = [115, 85, 83, 68, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        let sUSD_raw: [u8; 32] = [
+            115, 85, 83, 68, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0,
+        ];
         assert_eq!(to_asset_name(&sUSD_raw), "sUSD");
         assert_eq!(asset_name_to_bytes("sUSD".to_string()), sUSD_raw);
     }
