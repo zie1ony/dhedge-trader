@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 use log::*;
 
-pub type Symbol = &'static str;
+pub type Symbol = String;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Asset {
     pub balance: f64,
     pub rate: f64
@@ -36,7 +36,7 @@ impl Pool {
         Pool { expected_shares, assets }
     }
 
-    pub fn print(&self) {
+    pub fn print_status(&self) {
         info!("---------------------------------------------------------------------");
         info!("Pool Status");
 
@@ -83,7 +83,7 @@ impl Pool {
     }
 
     fn symbols(&self) -> Vec<Symbol> {
-        self.expected_shares.keys().map(|k| *k).collect::<Vec<Symbol>>().clone()
+        self.expected_shares.keys().map(|k| k.clone()).collect::<Vec<Symbol>>().clone()
     }
 
     fn asset(&self, symbol: &Symbol) -> &Asset {
@@ -163,8 +163,8 @@ impl Pool {
             }
 
             swaps.push(Swap {
-                from: best,
-                to: worst,
+                from: best.to_string(),
+                to: worst.to_string(),
                 from_amount: value_change / self.rate(best)
             });
 
@@ -186,24 +186,20 @@ impl Pool {
 
         info!("Rebalancing:");
         for swap in &self.rebalance_plan() {
-            let current_from_balance = self.assets.get(swap.from).unwrap().balance;
-            let current_to_balance = self.assets.get(swap.to).unwrap().balance;
+            let current_from_balance = self.asset(&swap.from.to_string()).balance;
+            let current_to_balance = self.asset(&swap.to.to_string()).balance;
             let to_amount = swap.from_amount * self.rate(&swap.from) / self.rate(&swap.to);
-            self.assets.insert(swap.from, Asset{
+            self.assets.insert(swap.from.clone(), Asset{
                 rate: self.rate(&swap.from),
                 balance: current_from_balance - swap.from_amount
             });
-            self.assets.insert(swap.to, Asset{
+            self.assets.insert(swap.to.clone(), Asset{
                 rate: self.rate(&swap.to),
                 balance: current_to_balance + to_amount
             });
             info!("[x] Swaped {} to {}", swap.from, swap.to);
         }
         info!("Rebalancing done!");
-    }
-
-    fn apply_swap(&mut self, swap: &Swap) {
-
     }
 }
 
@@ -215,32 +211,26 @@ mod tests {
     fn test_pool() {
         let _ = env_logger::builder().is_test(true).try_init();
         let mut expected_shares = HashMap::new();
-        expected_shares.insert("sBTC", 0.20);
-        expected_shares.insert("sETH", 0.20);
-        expected_shares.insert("sUSD", 0.20);
-        expected_shares.insert("sBNB", 0.20);
-        expected_shares.insert("sLTC", 0.20);
+        expected_shares.insert("sBTC".to_string(), 0.20);
+        expected_shares.insert("sETH".to_string(), 0.20);
+        expected_shares.insert("sUSD".to_string(), 0.20);
+        expected_shares.insert("sBNB".to_string(), 0.20);
+        expected_shares.insert("sLTC".to_string(), 0.20);
 
         let mut assets = HashMap::new();
-        assets.insert("sBTC", Asset::new(0.9, 10000.0));
-        assets.insert("sETH", Asset::new(20.2, 200.0));
-        assets.insert("sUSD", Asset::new(100.0, 1.0));
-        assets.insert("sBNB", Asset::new(50.0, 18.0));
-        assets.insert("sLTC", Asset::new(10.0, 45.0));
+        assets.insert("sBTC".to_string(), Asset::new(0.9, 10000.0));
+        assets.insert("sETH".to_string(), Asset::new(20.2, 200.0));
+        assets.insert("sUSD".to_string(), Asset::new(100.0, 1.0));
+        assets.insert("sBNB".to_string(), Asset::new(50.0, 18.0));
+        assets.insert("sLTC".to_string(), Asset::new(10.0, 45.0));
 
         let mut pool = Pool::new(expected_shares, assets);
-        for _ in 0..5 {
-            pool.print();
+        pool.print_status();
+        for _ in 0..3 {
             pool.rebalance();
+            pool.print_status();
         }
+        assert!(pool.balanced());
     }
-
-    // #[test]
-    // fn test_u256() {
-    //     assert_eq!(u256(1.0), U256::exp10(18));
-    //     assert_eq!(u256(0.1), U256::exp10(17));
-    //     assert_eq!(u256(1.234), U256::from_dec_str("1234").unwrap() * U256::exp10(15));
-    //     assert!(u256(1.0) < u256(2.123));
-    // }
 
 }
