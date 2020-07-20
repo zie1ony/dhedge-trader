@@ -1,8 +1,7 @@
-#[macro_use]
 extern crate log;
 
-mod dhedge;
 pub mod parser;
+mod dhedge;
 mod pool;
 
 pub use dhedge::DHedge;

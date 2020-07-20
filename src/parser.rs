@@ -1,6 +1,4 @@
-use web3::types::{Address, U256};
-
-use crate::Symbol;
+use web3::types::U256;
 
 // Remove trailing zeros
 pub fn to_asset_name(raw: &[u8; 32]) -> String {
@@ -91,8 +89,8 @@ mod tests {
     #[test]
     fn test_asset_name() {
         let sUSD_raw: [u8; 32] = [
-            115, 85, 83, 68, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0,
+            115, 85, 83, 68, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         ];
         assert_eq!(to_asset_name(&sUSD_raw), "sUSD");
         assert_eq!(asset_name_to_bytes("sUSD".to_string()), sUSD_raw);

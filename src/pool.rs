@@ -10,7 +10,7 @@ pub struct Asset {
 }
 
 impl Asset {
-    fn new(balance: f64, rate: f64) -> Asset {
+    pub fn new(balance: f64, rate: f64) -> Asset {
         Asset { balance, rate }
     }
 }
@@ -26,13 +26,19 @@ pub struct Swap {
 pub struct Pool {
     expected_shares: HashMap<Symbol, f64>,
     assets: HashMap<Symbol, Asset>,
+    min_trade_value: f64
 }
 
 impl Pool {
-    pub fn new(expected_shares: HashMap<Symbol, f64>, assets: HashMap<Symbol, Asset>) -> Pool {
+    pub fn new(
+        expected_shares: HashMap<Symbol, f64>, 
+        assets: HashMap<Symbol, Asset>,
+        min_trade_value: f64
+    ) -> Pool {
         Pool {
             expected_shares,
             assets,
+            min_trade_value
         }
     }
 
@@ -170,7 +176,7 @@ impl Pool {
                 best_value_change
             };
 
-            if value_change < 5.0 {
+            if value_change < self.min_trade_value {
                 break;
             }
 
@@ -241,7 +247,9 @@ mod tests {
         assets.insert("sBNB".to_string(), Asset::new(50.0, 18.0));
         assets.insert("sLTC".to_string(), Asset::new(10.0, 45.0));
 
-        let mut pool = Pool::new(expected_shares, assets);
+        let min_trade_value = 1.0;
+
+        let mut pool = Pool::new(expected_shares, assets, min_trade_value);
         pool.print_status();
         for _ in 0..3 {
             pool.rebalance();

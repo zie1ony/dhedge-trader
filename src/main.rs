@@ -1,17 +1,18 @@
-#[macro_use]
-extern crate log;
-
-use dht::*;
 use std::collections::HashMap;
+use log::*;
+use env_logger::Builder;
+use dht::*;
 
 const HTTP_ENDPOINT: &str = "http://161.35.205.60:8545";
 const POOL_ADDRESS: &str = "53523de8a90053ddb1d330499d3dc080b909edb9";
 
 #[tokio::main]
 async fn main() -> Result<(), ()> {
-    info!("DHedge Trader v0.1.0");
+    Builder::new()
+        .parse_filters("INFO")
+        .init();
 
-    let _ = env_logger::try_init();
+    info!("dHedge Trader v0.1.0");
     let mut expected_shares = HashMap::new();
     expected_shares.insert("sBTC".to_string(), 0.10);
     expected_shares.insert("sETH".to_string(), 0.20);
@@ -32,18 +33,17 @@ async fn main() -> Result<(), ()> {
     }
     assert_eq!(symbols.len(), assets.len());
 
-    let pool = Pool::new(expected_shares, assets);
+    let pool = Pool::new(expected_shares, assets, 3.0);
     pool.print_status();
 
     if pool.balanced() {
         info!("Pool is already balanced.");
-        return Ok(());
+    } else {
+        info!("Rebalancing");
+        let swaps = pool.rebalance_plan();
+        dhedge.rebalance(swaps).await;
+        info!("Rebalancing done!");
     }
-
-    info!("Rebalancing");
-    let swaps = pool.rebalance_plan();
-    dhedge.rebalance(swaps).await;
-    info!("Rebalancing done!");
-
+    info!("Done");
     Ok(())
 }

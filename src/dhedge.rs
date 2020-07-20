@@ -21,14 +21,10 @@ impl DHedge {
         let web3 = web3::Web3::new(web3::transports::Batch::new(http));
         let contract =
             Contract::from_json(web3.eth(), pool_address, include_bytes!("dhedge.abi")).unwrap();
-
         let accounts = web3.personal().list_accounts();
-
-        let _ = web3.transport().submit_batch().await.unwrap();
-
+        web3.transport().submit_batch().await.unwrap();
         let manager = accounts.await.unwrap()[0];
         info!("Using manager account: {}", manager);
-
         DHedge {
             manager,
             contract,
@@ -51,7 +47,7 @@ impl DHedge {
             let symbol = parser::to_asset_name(&symbols[i]);
             let balance = parser::u256_to_f64(&balances[i]);
             let rate = parser::u256_to_f64(&rates[i]);
-            assets.insert(symbol.clone(), Asset { balance, rate });
+            assets.insert(symbol.clone(), Asset::new(balance, rate));
             info!("[x] {} x {} at price {}", symbol, balance, rate);
         }
         info!("Reading from blockchain done!");
@@ -73,7 +69,6 @@ impl DHedge {
             txs.push(tx);
         }
         self.submit_batch().await;
-
         let mut i = 0;
         for tx in txs {
             let tx_hash = tx.await.unwrap();
@@ -87,7 +82,7 @@ impl DHedge {
     }
 
     pub async fn submit_batch(&mut self) {
-        let _ = self.web3.transport().submit_batch().await.unwrap();
+        self.web3.transport().submit_batch().await.unwrap();
     }
 
     pub async fn get_nonce(&mut self) -> U256 {
