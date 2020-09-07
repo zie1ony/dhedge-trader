@@ -1,7 +1,7 @@
 [package]
 name = "dht"
 version = "0.1.0"
-authors = ["zie1ony <maciej@casperlabs.io>"]
+authors = ["Maciej Zielinski <maciek.s.zielinski@gmail.com>"]
 edition = "2018"
 
 [dependencies]
