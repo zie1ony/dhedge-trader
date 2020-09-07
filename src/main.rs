@@ -1,16 +1,14 @@
-use std::collections::HashMap;
-use log::*;
-use env_logger::Builder;
 use dht::*;
+use env_logger::Builder;
+use log::*;
+use std::collections::HashMap;
 
 const HTTP_ENDPOINT: &str = "http://161.35.205.60:8545";
 const POOL_ADDRESS: &str = "53523de8a90053ddb1d330499d3dc080b909edb9";
 
 #[tokio::main]
 async fn main() -> Result<(), ()> {
-    Builder::new()
-        .parse_filters("INFO")
-        .init();
+    Builder::new().parse_filters("INFO").init();
 
     info!("dHedge Trader v0.1.0");
     let mut expected_shares = HashMap::new();

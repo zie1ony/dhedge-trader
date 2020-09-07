@@ -1,7 +1,7 @@
 extern crate log;
 
-pub mod parser;
 mod dhedge;
+pub mod parser;
 mod pool;
 
 pub use dhedge::DHedge;

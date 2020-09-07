@@ -26,19 +26,19 @@ pub struct Swap {
 pub struct Pool {
     expected_shares: HashMap<Symbol, f64>,
     assets: HashMap<Symbol, Asset>,
-    min_trade_value: f64
+    min_trade_value: f64,
 }
 
 impl Pool {
     pub fn new(
-        expected_shares: HashMap<Symbol, f64>, 
+        expected_shares: HashMap<Symbol, f64>,
         assets: HashMap<Symbol, Asset>,
-        min_trade_value: f64
+        min_trade_value: f64,
     ) -> Pool {
         Pool {
             expected_shares,
             assets,
-            min_trade_value
+            min_trade_value,
         }
     }
 
